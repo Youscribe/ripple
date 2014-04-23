@@ -72,26 +72,32 @@ namespace ripple.MSBuild
             }
 
             var reference = FindReference(name);
-            if (reference == null)
-            {
-                reference = new AssemblyReference(name, hintPath);
-                _project.Add(reference);
-            }
+            var projectRef = FindProjectReference(name);
 
-            var original = reference.HintPath;
-            reference.HintPath = hintPath;
-
-            if (original.IsNotEmpty())
+            var status = ReferenceStatus.Unchanged;
+            if (projectRef == null)
             {
-                original = original.Trim();
-            }
+                if (reference == null)
+                {
+                    reference = new AssemblyReference(name, hintPath);
+                    _project.Add(reference);
+                }
 
-            var status = string.Equals(original, hintPath, StringComparison.OrdinalIgnoreCase) ? ReferenceStatus.Unchanged : ReferenceStatus.Changed;
-            if (status == ReferenceStatus.Changed)
-            {
-                RippleLog.Debug("HintPath changed: " + original + " to " + hintPath);
-                _project.Remove(reference);
-                _project.Add(reference);
+                var original = reference.HintPath;
+                reference.HintPath = hintPath;
+
+                if (original.IsNotEmpty())
+                {
+                    original = original.Trim();
+                }
+
+                status = string.Equals(original, hintPath, StringComparison.OrdinalIgnoreCase) ? ReferenceStatus.Unchanged : ReferenceStatus.Changed;
+                if (status == ReferenceStatus.Changed)
+                {
+                    RippleLog.Debug("HintPath changed: " + original + " to " + hintPath);
+                    _project.Remove(reference);
+                    _project.Add(reference);
+                }
             }
 
             return status;
@@ -100,6 +106,11 @@ namespace ripple.MSBuild
         public AssemblyReference FindReference(string name)
         {
             return _project.All<AssemblyReference>().FirstOrDefault(x => x.Include == name);
+        }
+
+        public ProjectReference FindProjectReference(string name)
+        {
+            return _project.All<ProjectReference>().FirstOrDefault(x => x.Name == name);
         }
 
         public bool RemoveReference(string name)
