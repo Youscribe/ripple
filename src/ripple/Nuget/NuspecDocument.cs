@@ -63,12 +63,15 @@ namespace ripple.Nuget
         {
             var dependencies = _document.XPathSelectElement("//nuspec:dependencies", _xmlNamespaceManager);
 
-            foreach (XElement dependencyElement in dependencies.Nodes())
+            if (dependencies != null)
             {
-                if (dependencyElement.Attribute("id").Value == dependency.Name)
+                foreach (XElement dependencyElement in dependencies.Nodes())
                 {
-                    dependencyElement.SetAttributeValue("version", dependency.VersionSpec.ToString());
-                    return;
+                    if (dependencyElement.Attribute("id").Value == dependency.Name)
+                    {
+                        dependencyElement.SetAttributeValue("version", dependency.VersionSpec.ToString());
+                        return;
+                    }
                 }
             }
 
