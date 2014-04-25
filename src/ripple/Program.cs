@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using FubuCore.CommandLine;
+using FubuCsProjFile.MSBuild;
 
 namespace ripple
 {
@@ -11,13 +13,14 @@ namespace ripple
         {
             try
             {
+                System.Diagnostics.Debug.Assert(!args.Contains("--debug"));
                 RippleApplication.Start();
 
                 var factory = new CommandFactory();
                 factory.RegisterCommands(typeof (Program).Assembly);
 
                 var executor = new CommandExecutor(factory);
-                success = executor.Execute(args);
+                success = executor.Execute(args.Where(c => c != "--debug").ToArray());
             }
             catch (CommandFailureException e)
             {
